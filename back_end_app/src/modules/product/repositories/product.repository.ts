@@ -32,6 +32,15 @@ export class ProductRepository implements ProductRepositoryInterface {
 
     if (filters.name) where.name = { [Op.like]: `${filters.name}%` };
     if (filters.code) where.code = filters.code;
+    if (filters.created_at) {
+      const startDay = new Date(filters.created_at).setHours(0, 0, 0, 0);
+      const endDay = new Date(filters.created_at).setHours(23, 59, 59, 999);
+
+      where.created_at = {
+        [Op.gte]: startDay,
+        [Op.lte]: endDay
+      };
+    }
 
     try {
       return await this.productModel.findAll({ where });

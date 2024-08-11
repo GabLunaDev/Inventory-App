@@ -1,14 +1,7 @@
 export class QueryBatchDto {
-    batch_code?: string;
-    
-    startDate?: string;
-  
-    endDate?: string;  
+  batch_code?: string;
 
-    expiryDateStart?: string;
-  
-    expiryDateEnd?: string;  
-  
-    sortOrder?: 'asc' | 'desc';
-  }
-  
+  created_at?: string;
+
+  expiry_date?: string;
+}

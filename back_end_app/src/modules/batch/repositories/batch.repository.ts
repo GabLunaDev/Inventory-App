@@ -36,8 +36,18 @@ export class BatchRepository implements BatchRepositoryInterface {
   async findAll(filters?: QueryBatchDto): Promise<Batch[]> {
     const where: any = {};
 
-    if (filters.batch_code)
-      where.batch_code = { [Op.like]: `${filters.batch_code}%` };
+    if (filters.batch_code) where.batch_code = { [Op.like]: `${filters.batch_code}%` };
+    if (filters.expiry_date) where.expiry_date = filters.expiry_date;
+    if (filters.created_at) {
+      const startDay = new Date(filters.created_at).setHours(0, 0, 0, 0);
+      const endDay = new Date(filters.created_at).setHours(23, 59, 59, 999);
+
+      where.created_at = {
+        [Op.gte]: startDay,
+        [Op.lte]: endDay
+      };
+    }
+
 
     try {
       return await this.BatchModel.findAll({
