@@ -1,0 +1,6 @@
+back_end_app/dist
+back_end_app/node_modules
+back_end_app/.env
+front_end_app/dist
+front_end_app/node_modules
+front_end_app/.env
