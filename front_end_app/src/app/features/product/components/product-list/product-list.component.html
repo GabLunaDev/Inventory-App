@@ -1,0 +1,57 @@
+<div class="main_container">
+  <div class="container">
+    <h2>Products</h2>
+    <button (click)="openCreateProductDialog()">Create Product</button>
+  </div>
+
+  <div class="filter-container">
+    <label>
+      Code:
+      <input type="text" [(ngModel)]="filter.code" placeholder="Search by code">
+    </label>
+    <label>
+      Name:
+      <input type="text" [(ngModel)]="filter.name" placeholder="Search by name">
+    </label>
+    <label>
+      Created At:
+      <input type="date" [(ngModel)]="filter.created_at">
+    </label>
+    <button (click)="applyFilters()">Apply Filters</button>
+    <button (click)="clearFilters()">Clear Filters</button>
+  </div>
+
+  <div *ngIf="products.length; else noProducts">
+    <table>
+      <thead>
+        <tr>
+          <th>Code</th>
+          <th>Name</th>
+          <th>Created At</th>
+          <th>Updated At</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let product of products">
+          <td>{{ product.code }}</td>
+          <td>{{ product.name }}</td>
+          <td>{{ product.createdAt | dateFormat }}</td>
+          <td>{{ product.updatedAt | dateFormat }}</td>
+          <td>
+            <button (click)="openUpdateProductDialog(product.product_id)">
+              <ng-icon name="heroPencil"></ng-icon>
+            </button>
+            <button class="button-trash" (click)="deleteProduct(product.product_id)">
+              <ng-icon name="heroTrash"></ng-icon>
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  
+  <ng-template #noProducts>
+    <p>No products found.</p>
+  </ng-template>
+</div>

@@ -1,0 +1,26 @@
+<div>
+  <h1>{{ isEdit ? 'Edit Batch' : 'New Batch' }}</h1>
+  <form [formGroup]="batchForm" (ngSubmit)="saveBatch()">
+    <div class="form-group">
+      <label for="batch_code">Code:</label>
+      <input id="batch_code" formControlName="batch_code" />
+    </div>
+    <div class="form-group">
+      <label for="expiry_date">Expiry Date:</label>
+      <input id="expiry_date" type="date" formControlName="expiry_date" />
+    </div>
+    <div class="form-group">
+      <label for="quantity">Quantity:</label>
+      <input id="quantity" type="number" formControlName="quantity" />
+    </div>
+    <div class="form-group">
+      <label for="product_id">Batch:</label>
+      <select id="product_id" formControlName="product_id">
+        <option *ngFor="let product of products" [value]="product.product_id">
+          {{ product.name }}
+        </option>
+      </select>
+    </div>
+    <button type="submit">Save</button>
+  </form>
+</div>

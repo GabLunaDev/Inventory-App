@@ -31,6 +31,7 @@ export class ProductRepository implements ProductRepositoryInterface {
     const where: any = {};
 
     if (filters.name) where.name = { [Op.like]: `${filters.name}%` };
+    if (filters.code) where.code = filters.code;
 
     try {
       return await this.productModel.findAll({ where });

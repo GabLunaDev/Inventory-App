@@ -16,7 +16,7 @@ import { CreateBatchDto } from './dto/create-batch.dto';
 import { QueryBatchDto } from './dto/query-batch.dto';
 import { UpdateBatchDto } from './dto/update-batch.dto';
   
-  @Controller('batchs')
+  @Controller('batches')
   export class BatchController {
     constructor(private readonly batchService: BatchService) {}
   
