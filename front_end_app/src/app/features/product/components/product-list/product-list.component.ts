@@ -5,6 +5,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { ProductFormComponent } from '../product-form/product-form.component';
 import { QueryProduct } from '../../models/query-product.model';
 import { DialogMessageComponent } from '../../../../shared/components/dialog-message.component';
+import { ApiResponse } from '../../../../shared/models/api-response.model';
 
 @Component({
   selector: 'app-product-list',
@@ -21,32 +22,28 @@ export class ProductListComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.loadProducts();
-    this.dialog.open(DialogMessageComponent, {
-      data: { message: "Products listed successfully" },
-      panelClass: 'no-padding-dialog',
-      disableClose: true
-    });
+    this.loadProducts(true);
   }
 
-  loadProducts(): void {
+  loadProducts(showMessage: boolean): void {
     this.productService.getProducts(this.filter).subscribe(
-      (response: any) => {
-        this.products = response.data;
+      (response: ApiResponse<Product[]>) => {
+        this.products = response.data || [];
+        this.showDialogMessage(showMessage, response.message);
       },
       (error) => {
-        console.error('Erro na requisição:', error);
+        this.showDialogMessage(true, error.error.message);
       }
     );
   }
 
   applyFilters(): void {
-    this.loadProducts();
+    this.loadProducts(true);
   }
 
   clearFilters(): void {
     this.filter = new QueryProduct();
-    this.loadProducts();
+    this.loadProducts(true);
   }
 
   openCreateProductDialog(): void {
@@ -56,8 +53,9 @@ export class ProductListComponent implements OnInit {
     });
 
     dialogRef.afterClosed().subscribe((result) => {
-      if (result) {
-        this.loadProducts();
+      if (result.closed) {
+        this.showDialogMessage(true, result.message);
+        this.loadProducts(false);
       }
     });
   }
@@ -69,8 +67,9 @@ export class ProductListComponent implements OnInit {
     });
 
     dialogRef.afterClosed().subscribe((result) => {
-      if (result) {
-        this.loadProducts();
+      if (result.closed) {
+        this.showDialogMessage(true, result.message);
+        this.loadProducts(false);
       }
     });
   }
@@ -80,7 +79,16 @@ export class ProductListComponent implements OnInit {
       this.products = this.products.filter(
         (product) => product.product_id !== id
       );
-      this.applyFilters();
+      this.loadProducts(false);
     });
+  }
+
+  private showDialogMessage(showMessage: boolean, message?: string): void {
+    if (showMessage) {
+      this.dialog.open(DialogMessageComponent, {
+        data: { message },
+        panelClass: 'no-padding-dialog',
+      });
+    }
   }
 }

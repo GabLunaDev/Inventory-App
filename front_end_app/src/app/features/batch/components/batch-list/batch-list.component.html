@@ -16,7 +16,7 @@
     <label>
       Expiry Date:
       <input
-        type="text"
+        type="date"
         [(ngModel)]="filter.expiry_date"
         placeholder="Search by expiry date"
       />
@@ -29,7 +29,7 @@
     <button (click)="clearFilters()">Clear Filters</button>
   </div>
 
-  <div *ngIf="batchs.length; else noBatches">
+  <div *ngIf="batches.length; else noBatches">
     <table>
       <thead>
         <tr>
@@ -43,7 +43,7 @@
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let batch of batchs">
+        <tr *ngFor="let batch of batches">
           <td>{{ batch.batch_code }}</td>
           <td>{{ batch.quantity }}</td>
           <td>{{ batch.expiry_date }}</td>

@@ -1,13 +1,14 @@
 import { Component, OnInit, Inject } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ProductService } from '../../services/product.service';
-import { ActivatedRoute, Router } from '@angular/router';
 import { Product } from '../../models/product.model';
 import {
   MatDialogRef,
   MAT_DIALOG_DATA,
   MatDialog,
 } from '@angular/material/dialog';
+import { DialogMessageComponent } from '../../../../shared/components/dialog-message.component';
+import { ApiResponse } from '../../../../shared/models/api-response.model';
 
 @Component({
   selector: 'app-product-form',
@@ -22,11 +23,10 @@ export class ProductFormComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private productService: ProductService,
-    private route: ActivatedRoute,
-    private router: Router,
     public dialog: MatDialog,
     private dialogRef: MatDialogRef<ProductFormComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: any
+    @Inject(MAT_DIALOG_DATA)
+    public data: { isEdit: boolean; productId?: string }
   ) {}
 
   ngOnInit(): void {
@@ -39,22 +39,50 @@ export class ProductFormComponent implements OnInit {
       this.productId = this.data.productId;
       this.productService
         .getProductById(this.data.productId)
-        .subscribe((product: Product) => {
-          this.productForm.patchValue(product);
+        .subscribe((result: ApiResponse<Product>) => {
+          this.productForm.patchValue({
+            name: result?.data?.name,
+          });
         });
     }
   }
 
   saveProduct(): void {
+    if (!this.productForm.get('name')?.value) {
+      this.dialog.open(DialogMessageComponent, {
+        data: { message: 'The name field is required.' },
+        panelClass: 'no-padding-dialog',
+      });
+      return;
+    }
+
     if (this.productForm.valid) {
       const product: Product = this.productForm.value;
 
       if (this.isEdit && this.productId) {
-        this.dialogRef.close(true);
+        this.productService.updateProduct(this.productId, product).subscribe(
+          (response: ApiResponse<Product>) => {
+            this.dialogRef.close({ closed: true, message: response.message });
+          },
+          (error) => {
+            this.dialog.open(DialogMessageComponent, {
+              data: { message: error.error.message },
+              panelClass: 'no-padding-dialog',
+            });
+          }
+        );
       } else {
-        this.productService.createProduct(product).subscribe(() => {
-          this.dialogRef.close(true);
-        });
+        this.productService.createProduct(product).subscribe(
+          (response: ApiResponse<Product>) => {
+            this.dialogRef.close({ closed: true, message: response.message });
+          },
+          (error) => {
+            this.dialog.open(DialogMessageComponent, {
+              data: { message: error.error.message },
+              panelClass: 'no-padding-dialog',
+            });
+          }
+        );
       }
     }
   }

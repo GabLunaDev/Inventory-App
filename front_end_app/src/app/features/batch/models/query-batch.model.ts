@@ -5,13 +5,12 @@ export class QueryBatch {
   expiry_date?: string;
   product_id?: string;
   created_at?: Date;
-  sortOrder?: 'asc' | 'desc';
 
   toHttpParams(): HttpParams {
     let params = new HttpParams();
 
     if (this.batch_code) {
-      params = params.set('code', this.batch_code);
+      params = params.set('batch_code', this.batch_code);
     }
     if (this.expiry_date) {
       params = params.set('expiry_date', this.expiry_date);
@@ -21,9 +20,6 @@ export class QueryBatch {
     }
     if (this.created_at) {
       params = params.set('created_at', this.created_at.toISOString());
-    }
-    if (this.sortOrder) {
-      params = params.set('sortOrder', this.sortOrder);
     }
 
     return params;

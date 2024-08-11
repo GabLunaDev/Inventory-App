@@ -1,15 +1,12 @@
 import { Component, OnInit, Inject } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
-import {
-  MatDialogRef,
-  MAT_DIALOG_DATA,
-  MatDialog,
-} from '@angular/material/dialog';
+import { MatDialogRef, MAT_DIALOG_DATA, MatDialog } from '@angular/material/dialog';
 import { BatchService } from '../../services/batch.service';
 import { Batch } from '../../models/batch.model';
 import { Product } from '../../../product/models/product.model';
 import { ProductService } from '../../../product/services/product.service';
+import { ApiResponse } from '../../../../shared/models/api-response.model';
+import { DialogMessageComponent } from '../../../../shared/components/dialog-message.component';
 
 @Component({
   selector: 'app-batch-form',
@@ -28,7 +25,7 @@ export class BatchFormComponent implements OnInit {
     private productService: ProductService,
     public dialog: MatDialog,
     private dialogRef: MatDialogRef<BatchFormComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: any
+    @Inject(MAT_DIALOG_DATA) public data: { isEdit: boolean; batchId?: string }
   ) {}
 
   ngOnInit(): void {
@@ -40,21 +37,28 @@ export class BatchFormComponent implements OnInit {
     });
 
     this.productService.getProducts().subscribe(
-      (response: any) => {
-        this.products = response.data;
+      (response: ApiResponse<Product[]>) => {
+        this.products = response.data || [];
       },
       (error) => {
-        console.error('Erro na requisição:', error);
+        this.dialog.open(DialogMessageComponent, {
+          data: { message: 'Error fetching products' },
+          panelClass: 'no-padding-dialog',
+        });
       }
     );
 
-    if (this.data && this.data.isEdit && this.data.batchId) {
+    if (this.data.isEdit && this.data.batchId) {
       this.isEdit = this.data.isEdit;
       this.batchId = this.data.batchId;
       this.batchService
         .getBatchById(this.data.batchId)
-        .subscribe((batch: Batch) => {
-          this.batchForm.patchValue(batch);
+        .subscribe((response: ApiResponse<Batch>) => {
+          this.batchForm.patchValue({
+            batch_code: response.data?.batch_code,
+            expiry_date: response.data?.expiry_date,
+            quantity: response.data?.quantity,
+          });
         });
     }
   }
@@ -64,11 +68,29 @@ export class BatchFormComponent implements OnInit {
       const batch: Batch = this.batchForm.value;
 
       if (this.isEdit && this.batchId) {
-        this.dialogRef.close(true);
+        this.batchService.updateBatch(this.batchId, batch).subscribe(
+          (response: ApiResponse<Batch>) => {
+            this.dialogRef.close({ closed: true, message: response.message });
+          },
+          (error) => {
+            this.dialog.open(DialogMessageComponent, {
+              data: { message: error.error.message },
+              panelClass: 'no-padding-dialog',
+            });
+          }
+        );
       } else {
-        this.batchService.createBatch(batch).subscribe(() => {
-          this.dialogRef.close(true);
-        });
+        this.batchService.createBatch(batch).subscribe(
+          (response: ApiResponse<Batch>) => {
+            this.dialogRef.close({ closed: true, message: response.message });
+          },
+          (error) => {
+            this.dialog.open(DialogMessageComponent, {
+              data: { message: error.error.message },
+              panelClass: 'no-padding-dialog',
+            });
+          }
+        );
       }
     }
   }

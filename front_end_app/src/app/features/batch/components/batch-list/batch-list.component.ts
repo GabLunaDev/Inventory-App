@@ -5,6 +5,7 @@ import { Batch } from '../../models/batch.model';
 import { QueryBatch } from '../../models/query-batch.model';
 import { BatchService } from '../../services/batch.service';
 import { BatchFormComponent } from '../batch-form/batch-form.component';
+import { ApiResponse } from '../../../../shared/models/api-response.model';
 
 @Component({
   selector: 'app-batch-list',
@@ -12,7 +13,7 @@ import { BatchFormComponent } from '../batch-form/batch-form.component';
   styleUrls: ['./batch-list.component.scss'],
 })
 export class BatchListComponent implements OnInit {
-  batchs: Batch[] = [];
+  batches: Batch[] = [];
   filter: QueryBatch = new QueryBatch();
 
   constructor(
@@ -21,32 +22,34 @@ export class BatchListComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.loadBatchs();
-    this.dialog.open(DialogMessageComponent, {
-      data: { message: "Batchs listed successfully" },
-      panelClass: 'no-padding-dialog',
-      disableClose: true
-    });
+    this.loadBatches();
   }
 
-  loadBatchs(): void {
-    this.batchService.getBatchs(this.filter).subscribe(
-      (response: any) => {
-        this.batchs = response.data;
+  loadBatches(): void {
+    this.batchService.getBatches(this.filter).subscribe(
+      (response: ApiResponse<Batch[]>) => {
+        this.batches = response.data || [];
+        this.dialog.open(DialogMessageComponent, {
+          data: { message: response.message },
+          panelClass: 'no-padding-dialog'
+        });
       },
       (error) => {
-        console.error('Erro na requisição:', error);
+        this.dialog.open(DialogMessageComponent, {
+          data: { message: 'Error fetching batches' },
+          panelClass: 'no-padding-dialog'
+        });
       }
     );
   }
 
   applyFilters(): void {
-    this.loadBatchs();
+    this.loadBatches();
   }
 
   clearFilters(): void {
     this.filter = new QueryBatch();
-    this.loadBatchs();
+    this.loadBatches();
   }
 
   openCreateBatchDialog(): void {
@@ -56,8 +59,12 @@ export class BatchListComponent implements OnInit {
     });
 
     dialogRef.afterClosed().subscribe((result) => {
-      if (result) {
-        this.loadBatchs();
+      if (result?.closed) {
+        this.dialog.open(DialogMessageComponent, {
+          data: { message: result.message },
+          panelClass: 'no-padding-dialog'
+        });
+        this.loadBatches();
       }
     });
   }
@@ -69,15 +76,19 @@ export class BatchListComponent implements OnInit {
     });
 
     dialogRef.afterClosed().subscribe((result) => {
-      if (result) {
-        this.loadBatchs();
+      if (result?.closed) {
+        this.dialog.open(DialogMessageComponent, {
+          data: { message: result.message },
+          panelClass: 'no-padding-dialog'
+        });
+        this.loadBatches();
       }
     });
   }
 
   deleteBatch(id: string): void {
     this.batchService.deleteBatch(id).subscribe(() => {
-      this.batchs = this.batchs.filter(
+      this.batches = this.batches.filter(
         (batch) => batch.batch_id !== id
       );
       this.applyFilters();
