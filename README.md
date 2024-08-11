@@ -31,7 +31,7 @@ Certifique-se de que você tenha o Docker e o Docker Compose instalados em sua m
     docker-compose up --build
     ```
 
-    > ⚠️ Certifique-se que não há outras aplicações rodando nas portas **4200**, **3000** e **3306**. Se tiver você pode alterar as portas no docker-compose.yml 
+    > ⚠️ Certifique-se que não há outras aplicações rodando nas portas **4200**, **3000** e **3306**. Se estiver, você pode alterar as portas no docker-compose.yml 
 
 3. **Verificar se os contêineres foram iniciados.**
     
